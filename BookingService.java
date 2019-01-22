@@ -4,28 +4,19 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.fuber.cabbooking.exception.FuberException;
 import com.fuber.cabbooking.model.Amount;
 import com.fuber.cabbooking.model.Cab;
 import com.fuber.cabbooking.model.Customer;
 import com.fuber.cabbooking.model.Location;
 import com.fuber.cabbooking.model.Preference;
 
-@Path("/bookingService")
 public class BookingService {
 	
-	@GET
-	@Path("/cabs")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Cab> getAvailableCabs(){
+	public List<Cab> getAvailableCabs() throws FuberException {
 		List<Cab> cabs = new ArrayList<>();
 		int count = 10;
 		while(count < 10){
@@ -36,7 +27,6 @@ public class BookingService {
 		return cabs;
 	}
 	
-	
 	public Cab createNewCab(){
 		Cab cab = new Cab();
 		cab.setAvailable(true);
@@ -46,12 +36,7 @@ public class BookingService {
 		return cab;
 	}
 	
-	
-	@POST
-	@Path("/book")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)	
-	public Response bookCab(@QueryParam("latitude") String latitude,  @QueryParam("longitude") String longitude, @QueryParam("preference") String preference){
+	public Response bookCab(@QueryParam("latitude") String latitude,  @QueryParam("longitude") String longitude, @QueryParam("preference") String preference) throws FuberException{
 		
 		if(null != latitude && null != longitude){
 			Customer customer = new Customer();
@@ -74,11 +59,7 @@ public class BookingService {
 		}
 	}
 	
-	@POST
-	@Path("/end")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)	
-	public Response endTrip(@QueryParam("latitude") String latitude,  @QueryParam("longitude") String longitude){
+	public Response endTrip(@QueryParam("latitude") String latitude,  @QueryParam("longitude") String longitude) throws FuberException{
 		
 		if(null != latitude && null != longitude){
 			Customer customer = new Customer();
@@ -95,7 +76,7 @@ public class BookingService {
 			return Response.ok("Error occurred. Resend request").build();
 		}
 	}
-	private void assignCab(Cab cab, Customer customer){
+	private void assignCab(Cab cab, Customer customer) throws FuberException{
 		if(cab.isAvailable() && matchPreference(cab, customer)){
 			double distBetween = getDistanceBetween(cab.getCabLocation().getLatitude(),
 					customer.getStartLocation().getLatitude());
@@ -112,7 +93,7 @@ public class BookingService {
 			return false;
 	}
 	
-	private double getDistanceBetween(double loc1, double loc2){
+	private double getDistanceBetween(double loc1, double loc2) throws FuberException{
 		double loc1square = Math.pow(loc1, 2);
 		double loc2square = Math.pow(loc2, 2);
 		
@@ -123,7 +104,7 @@ public class BookingService {
 		}
 	}
 	
-	private void startRide(Cab cab, Customer customer){
+	private void startRide(Cab cab, Customer customer) throws FuberException{
 		if(null != cab){
 			cab.setAvailable(false);
 			customer.setCabAssigned(cab);
@@ -132,7 +113,7 @@ public class BookingService {
 		}
 	}
 	
-	private Amount endRide(Cab cab, Customer customer){
+	private Amount endRide(Cab cab, Customer customer) throws FuberException {
 		if(null != cab){
 			cab.setAvailable(true);
 			cab.setCabLocation(customer.getEndLocation());
@@ -143,7 +124,7 @@ public class BookingService {
 		}
 	}
 	
-	private Amount getTotalFarePayable(Location loc1, Location loc2){
+	private Amount getTotalFarePayable(Location loc1, Location loc2) throws FuberException{
 		double distanceTravelled = getDistanceBetween(loc1.getLatitude(), loc2.getLatitude());
 		return new Amount("DOG", distanceTravelled * 2);  
 	}
@@ -153,7 +134,7 @@ public class BookingService {
 		return new Cab();
 	}
 	
-	private Location getStartLocation(){
+	private Location getStartLocation() throws FuberException {
 		//fetch the cab assigned details from DB
 		return new Location("112.22", "122.44");
 	}

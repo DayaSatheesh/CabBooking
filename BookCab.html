@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Fuber Cab booking application</title>
+</head>
+<script type="text/javascript" >
+function callAddressService(reqURL){
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET",reqURL, true);
+	xmlhttp.onreadystatechange=function(){
+		if(xmlhttp.status == 200){
+		document.getElementByName("latitude").value = xmlhttp.responseText.results[0].lat;
+		document.getElementByName("longitude").value = xmlhttp.responseText.results[0].lng;
+		}
+	}	
+}
+
+function callBookingService(reqURL){
+	var xmlhttp = new XMLHttpRequest();
+	xhttp.open("POST", reqURL, true);
+	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp.send("latitude="+document.getElementByName("latitude").value+"&longitude="+document.getElementByName("longitude").value+"&preference="+document.getElementByName("preference").value);
+}
+
+</script>
+
+<body>
+<input type="hidden" name="address">
+<input type="hidden" name="latitude">
+<input type="hidden" name="longitude">
+Select customer location:
+<input type="text" name="location" onblur="callAddressService("http://apis.mapmyindia.con/advancedmaps/v1addr=Whitefield&pin=560046")">
+Select preference
+<input type="text" name="preference">
+Confirm booking
+<input type="button" onclick="callBookingService("http://localhost:8080/FuberBooking/bookingService/book")">
+End ride
+<input type="button" onclick="callEndRideService("http://localhost:8080/FuberBooking/bookingService/end")">
+</body>
+</html>
